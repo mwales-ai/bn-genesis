@@ -349,6 +349,9 @@ class GenesisView(binaryview.BinaryView):
             log.log_error(traceback.format_exc())
             return False
 
+    def perform_get_address_size(self):
+        return 4  # M68K is 32-bit
+
     def perform_is_executable(self):
         return True
 
