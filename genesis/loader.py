@@ -1,4 +1,4 @@
-from binaryninja import (binaryview, Architecture, core, SegmentFlag,
+from binaryninja import (binaryview, Architecture, SegmentFlag,
                          SectionSemantics, Symbol, SymbolType, log,
                          StructureBuilder, Type)
 import struct
@@ -90,6 +90,7 @@ class GenesisView(binaryview.BinaryView):
 
     @classmethod
     def is_valid_for_data(self, data):
+        log.log_debug("Genesis is_valid_for_data running")
         console_name = data[0x100:0x110].decode('utf-8', errors='replace')
         if ('SEGA MEGA DRIVE' not in console_name.upper()) and \
                 ('SEGA GENESIS' not in console_name.upper()):
@@ -105,11 +106,6 @@ class GenesisView(binaryview.BinaryView):
 
         return True
 
-    @classmethod
-    def get_load_settings_for_data(self, data):
-        load_settings_id = core.BNGetUniqueIdentifierString()
-        return core.BNAllocString(load_settings_id)
-
     # ------------------------------------------------------------------
     # Memory map
     # ------------------------------------------------------------------
@@ -117,7 +113,7 @@ class GenesisView(binaryview.BinaryView):
     def create_segments(self):
         # ROM
         self.add_auto_segment(
-            0, len(self.raw), 0, len(self.raw),
+            0, self.raw.length, 0, self.raw.length,
             SegmentFlag.SegmentReadable | SegmentFlag.SegmentExecutable
         )
         # Work RAM (64 KB)
@@ -167,7 +163,7 @@ class GenesisView(binaryview.BinaryView):
             'rom_header', 0x100, 0x100,
             SectionSemantics.ReadOnlyDataSectionSemantics)
         self.add_auto_section(
-            'code', 0x200, len(self.raw) - 0x200,
+            'code', 0x200, self.raw.length - 0x200,
             SectionSemantics.ReadOnlyCodeSectionSemantics)
         self.add_auto_section(
             'work_ram', 0xff0000, 0x10000,
@@ -201,7 +197,7 @@ class GenesisView(binaryview.BinaryView):
         self.define_auto_symbol(Symbol(SymbolType.DataSymbol, 0, 'InitialStackPointer'))
 
         # Entry point (offset 4)
-        entry_addr = struct.unpack('>I', self.raw[4:8])[0]
+        entry_addr = struct.unpack('>I', self.raw.read(4, 4))[0]
         self.add_entry_point(entry_addr)
         self.define_auto_symbol(Symbol(SymbolType.FunctionSymbol, entry_addr, '_start'))
         self.add_function(entry_addr)
@@ -209,8 +205,8 @@ class GenesisView(binaryview.BinaryView):
         seen = {entry_addr}
 
         for offset, name, description in _VECTOR_TABLE:
-            raw_addr = struct.unpack('>I', self.raw[offset:offset + 4])[0]
-            if raw_addr == 0 or raw_addr >= len(self.raw):
+            raw_addr = struct.unpack('>I', self.raw.read(offset, 4))[0]
+            if raw_addr == 0 or raw_addr >= self.raw.length:
                 continue
             if raw_addr not in seen:
                 self.add_function(raw_addr)
@@ -357,4 +353,4 @@ class GenesisView(binaryview.BinaryView):
         return True
 
     def perform_get_entry_point(self):
-        return struct.unpack('>I', self.raw[4:8])[0]
+        return struct.unpack('>I', self.raw.read(4, 4))[0]
