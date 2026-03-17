@@ -233,7 +233,8 @@ class VdpAnalysis:
             log.log_debug('genesis: VDP write with unexpected size {}'.format(value_size))
 
     def comment_vdp_instructions(self, mlil_func):
-        for cur_inst in mlil_func.instructions:
+        print(f"MLIL func = {type(mlil_func)}")
+        for cur_inst in mlil_func:
             if cur_inst.operation != binaryninja.MediumLevelILOperation.MLIL_STORE:
                 continue
 
