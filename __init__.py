@@ -1,6 +1,6 @@
 from binaryninja import PluginCommand
 from binaryninja import ChoiceField
-from .genesis import GenesisChecksum, GenesisAssemble, GenesisCallTableEnum, VdpAnalysis
+from .genesis import GenesisChecksum, GenesisAssemble, GenesisCallTableEnum, VdpAnalysis, GenesisGameDefinition
 
 
 def checksum(view):
@@ -42,5 +42,15 @@ PluginCommand.register_for_medium_level_il_function(
     'genesis: comment VDP inst for current function',
     'Iterate through selected function and comment VDP access instructions',
     comment_vdp_instructions
+)
+
+def load_game_definition(view):
+    gd = GenesisGameDefinition(view)
+    gd.start()
+
+PluginCommand.register(
+    'genesis: load game definition',
+    'Load a game definition JSON and label sprites/palettes in ROM',
+    load_game_definition
 )
 
