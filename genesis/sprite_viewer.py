@@ -241,7 +241,8 @@ def load_palettes_from_json(json_path, bv):
             name = pal_data.get('name', pal_id)
 
             # Try reading palette from the CRAM values in JSON first
-            cram_values = pal_data.get('colors', [])
+            # Field is 'cram_values' in our format, but check 'colors' too
+            cram_values = pal_data.get('cram_values', pal_data.get('colors', []))
             if len(cram_values) >= 16:
                 colors = []
                 for cv in cram_values[:16]:
