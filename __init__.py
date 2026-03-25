@@ -1,6 +1,6 @@
 from binaryninja import PluginCommand
 from binaryninja import ChoiceField
-from .genesis import GenesisChecksum, GenesisAssemble, GenesisCallTableEnum, VdpAnalysis, GenesisGameDefinition
+from .genesis import GenesisChecksum, GenesisAssemble, GenesisCallTableEnum, VdpAnalysis, GenesisGameDefinition, GenesisImportCodeTrace
 
 
 def checksum(view):
@@ -52,5 +52,15 @@ PluginCommand.register(
     'genesis: load game definition',
     'Load a game definition JSON and label sprites/palettes in ROM',
     load_game_definition
+)
+
+def import_code_trace(view):
+    ct = GenesisImportCodeTrace(view)
+    ct.start()
+
+PluginCommand.register(
+    'genesis: import code trace',
+    'Import BlastEm code trace JSON to mark branch targets as functions',
+    import_code_trace
 )
 
