@@ -19,16 +19,79 @@ Suite of Binary Ninja plugins that assist with SEGA Genesis ROM hacking
 
 ![vdp comment example](vdp_analysis.png)
 
-## Dependencies
+## Features
 
-* Assembler plugin requires `gcc-m68k-linux-gnu` (Ubuntu or Debian)
-* Loader requires the third party m68k processor module, which can be found [here](https://github.com/wrigjl/binaryninja-m68k)
+### Python Plugin (core)
+* **ROM Loader** — parses Genesis ROM header, maps memory segments (ROM, RAM, Z80, VDP, I/O)
+* **`genesis: load game definition`** — imports a sprite editor JSON file, creates `SpriteTiles_WxH` struct types and `GenesisPalette` structs, labels all sprite patterns and palettes at their ROM addresses
+* **`genesis: comment VDP inst`** — annotates VDP register writes with readable comments
+* **`genesis: assemble and patch`** — compile M68K assembly and apply as a ROM patch
+* **`genesis: fixup ROM checksum`** — recalculate and write the ROM checksum
 
-## Directions
+### C++ Sprite Viewer Sidebar (`cpp_ui/`)
+* Native Qt6 sidebar widget that renders Genesis 4bpp tile data as visual sprites
+* Live preview at cursor address with configurable W x H tile grid
+* Column-major tile ordering matching Genesis hardware sprites
+* Palette loading from game definition JSON or directly from ROM
+* Adjustable zoom (1-16x)
 
-If you have the dependencies installed, you can just load a Genesis ROM.  If your ROM is successfully loaded you will
-have an additional item in the dropdown above the code listing that is normally just RAW (it will say Sega Genesis / Megadrive ROM),
-and you should have additional segments and sections that are specific to the Genesis.
+## Installation
+
+### Python Plugin (required)
+
+```bash
+# Symlink the plugin into Binary Ninja's plugin directory
+ln -s /path/to/bn-genesis ~/.binaryninja/plugins/genesis
+
+# Install dependencies
+sudo apt install gcc-m68k-linux-gnu
+```
+
+The loader also requires the third-party [binaryninja-m68k](https://github.com/wrigjl/binaryninja-m68k) processor module.
+
+### C++ Sprite Viewer (optional)
+
+The native sprite viewer sidebar requires building from source.
+
+```bash
+# 1. Clone the Binary Ninja API and initialize submodules
+git clone https://github.com/Vector35/binaryninja-api.git bn-api
+cd bn-api && git submodule update --init vendor/fmt && cd ..
+
+# 2. Build the plugin
+cd bn-genesis/cpp_ui
+mkdir -p build && cd build
+cmake .. \
+    -DBN_API_PATH=/path/to/bn-api \
+    -DBN_INSTALL_DIR=/path/to/binaryninja
+make
+
+# 3. Install
+cp libgenesis_sprite_viewer.so ~/.binaryninja/plugins/
+```
+
+**Build requirements:**
+* Qt6 development libraries (`qt6-base-dev`)
+* CMake 3.13+
+* Binary Ninja API headers (cloned above)
+* Binary Ninja installation (for `libbinaryninjacore.so` and `libbinaryninjaui.so`)
+
+## Usage
+
+### Loading a ROM
+
+If you have the dependencies installed, just load a Genesis ROM (.bin format). If successfully loaded, you'll see "Sega Genesis / Megadrive ROM" in the view type dropdown, with proper memory segments for ROM, RAM, Z80, VDP, and I/O.
+
+### Labeling Sprites from a Game Definition
+
+1. Open a Genesis ROM in Binary Ninja
+2. Run **Plugins > genesis: load game definition**
+3. Select your game definition JSON file (same format as the sprite editor)
+4. All sprite patterns and palettes are labeled at their ROM addresses with proper struct types
+
+### Using the Sprite Viewer Sidebar
+
+After installing the C++ sidebar widget, a "Sprite Viewer" icon appears in the sidebar. Click it to open the viewer, then navigate to any ROM address containing tile data to see it rendered visually.
 
 # Genesis Hacking
 
