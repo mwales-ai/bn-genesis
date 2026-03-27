@@ -234,7 +234,8 @@ class VdpAnalysis:
 
     def comment_vdp_instructions(self, mlil_func):
         print(f"MLIL func = {type(mlil_func)}")
-        for cur_inst in mlil_func:
+        for cur_inst in mlil_func.instructions:
+            print(f"cur_inst is type {type(cur_inst)}")
             if cur_inst.operation != binaryninja.MediumLevelILOperation.MLIL_STORE:
                 continue
 
