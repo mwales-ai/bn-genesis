@@ -93,6 +93,18 @@ If you have the dependencies installed, just load a Genesis ROM (.bin format). I
 
 After installing the C++ sidebar widget, a "Sprite Viewer" icon appears in the sidebar. Click it to open the viewer, then navigate to any ROM address containing tile data to see it rendered visually.
 
+### Importing BlastEm Code Traces
+
+BlastEm can record branch/jump targets during emulation. Import them to improve
+Binary Ninja's analysis of indirect jumps and computed branches:
+
+1. In BlastEm debugger: `codetrace output.json` → play game → `codetracestop`
+2. In Binary Ninja: **Plugins > genesis: import code trace** → select the JSON
+3. JSR/BSR targets become functions, JMP targets become functions, Bcc targets get labels
+4. Binary Ninja re-analyzes with the new function entry points
+
+This is especially valuable for jump tables and code reached through register-indirect jumps.
+
 # Genesis Hacking
 
 ## Emulators / Debuggers
